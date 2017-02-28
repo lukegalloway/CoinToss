@@ -1,0 +1,110 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Coin Toss";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int useGrid = 0;
+    string queryResult = string.Empty;
+    if (ViewData["json"] != null)
+    {
+        useGrid = !string.IsNullOrEmpty(ViewData["json"].ToString()) ? 1 : 0;
+        queryResult = ViewData["json"].ToString();
+    }
+    List<SelectListItem> listItems = new List<SelectListItem>();
+    List<SelectListItem> listItems2 = new List<SelectListItem>();
+    Dictionary<string, string> sqlQueries = (Dictionary<string, string>)ViewData["SqlExamples"];
+    Dictionary<string, string> coinQueries = (Dictionary<string, string>)ViewData["CoinExamples"];
+    string selectedSql = string.Empty;
+    string selectedCoin = string.Empty;
+    if (ViewData["SqlQuery"] != null)
+    {
+        selectedSql = "$('#SqlSelection').val(\"" + ViewData["SqlQuery"].ToString() + "\");";
+    }
+    if (ViewData["CoinQuery"] != null)
+    {
+        selectedCoin = "$('#CoinSelection').val(\"" + ViewData["CoinQuery"].ToString() + "\");";
+    }
+    foreach (var s in sqlQueries)
+    {
+        listItems.Add(new SelectListItem
+        {
+            Text = s.Value,
+            Value = s.Value
+        });
+    }
+    foreach (var s in coinQueries)
+    {
+        listItems2.Add(new SelectListItem
+        {
+            Text = s.Value,
+            Value = s.Value
+        });
+    }
+}
+@{
+    using (Html.BeginForm("CoinToss", "Home"))
+    {
+        @Html.AntiForgeryToken();
+        <div class="row" style="padding-top:15px;">
+            <div class="col-md-1">COIN:</div>
+            <div class="col-md-6">
+                @Html.DropDownList("CoinSelection", listItems2)
+            </div>
+        </div>
+        <div class="row" style="padding-top:15px;">
+            <div class="col-md-1">SQL :</div>
+            <div class="col-md-6">
+                @Html.DropDownList("SqlSelection", listItems)
+            </div>
+        </div>
+        <div class="row" style="padding-top:15px;">
+            <div class="col-md-12">
+                <textarea style="max-width:100%;width:100%;" name="Query" id="Query" rows="12" cols="200"></textarea>
+                <textarea name="CoinQuery" id="CoinQuery" style="visibility:hidden;"></textarea>
+                <textarea name="SqlQuery" id="SqlQuery" style="visibility:hidden;"></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <input class="center-block" type="submit" value="Submit Query" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table cellpadding="0" cellspacing="0" border="0" class="display" id="results"></table>
+            </div>
+        </div>        
+        <script type="text/javascript">
+            $('#CoinSelection').click(function(){//change
+                $('#Query').val(this.value);   
+                $('#CoinQuery').val(this.value);
+            });
+            $('#SqlSelection').click(function(){//change
+                $('#Query').val(this.value);  
+                $('#SqlQuery').val(this.value);
+            });
+            $(document).ready(function () {
+                @Html.Raw(selectedSql)
+                @Html.Raw(selectedCoin)
+                var string1 = '[{"COLUMNS":[{ "title": "NAME", "visible": true}, { "Title": "COUNTY", "visible": false}],"DATA":[["John Doe","Fresno"],["Billy","Fresno"],["Tom","Kern"],["King Smith","Kings"]]}]';
+                var testObject = eval();
+                var useIt = @useGrid;
+                if( useIt ){
+
+                    var d = $('<div>')
+
+                    d.html('@queryResult');
+                    var string2 = "[" + d.text() + "]";
+                    var dataObject = eval(string2);
+
+                    var columns = [];
+                    $('#results').DataTable({
+                        "data": dataObject[0].DATA,
+                        "columns": dataObject[0].COLUMNS
+                    });
+                }
+                });
+        </script>
+    }
+}

@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "exports": {
+    "CoinToss.Business/1.0.0": {
+      "type": "project",
+      "framework": ".NETFramework,Version=v4.5.2",
+      "compile": {
+        "bin/Debug/CoinToss.Business.dll": {}
+      },
+      "runtime": {
+        "bin/Debug/CoinToss.Business.dll": {}
+      },
+      "contentFiles": {
+        "bin/Debug/CoinToss.Business.pdb": {
+          "buildAction": "None",
+          "codeLanguage": "any",
+          "copyToOutput": true
+        }
+      }
+    }
+  }
+}
