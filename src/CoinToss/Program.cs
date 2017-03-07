@@ -11,6 +11,7 @@ namespace CoinToss
     {
         public static void Main(string[] args)
         {
+            //Program
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())

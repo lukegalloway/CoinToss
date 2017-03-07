@@ -1,0 +1,68 @@
+﻿@model ICollection<string>
+@{
+    ViewData["Title"] = "Coin Toss";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int useGrid = 0;
+    string queryResult = string.Empty;
+    if (ViewData["json"] != null)
+    {
+        useGrid = !string.IsNullOrEmpty(ViewData["json"].ToString()) ? 1 : 0;
+        queryResult = ViewData["json"].ToString();
+    }
+    List<SelectListItem> listItems = new List<SelectListItem>();
+    foreach (var s in Model)
+    {
+        listItems.Add(new SelectListItem
+        {
+            Text = s,
+            Value = s
+        });
+    }
+}
+@{
+    using (Html.BeginForm("CoinSelect", "Home"))
+    {
+        @Html.AntiForgeryToken();
+        <div class="row" style="padding-top:15px;">
+            <div class="col-md-12">
+                @if (listItems != null && listItems.Count > 0)
+                {
+                    @Html.DropDownList("SingerSelection", listItems)//, new { @onchange = "UpdateValue(this);" })
+                    @*<textarea style="visibility:hidden;" name="Query" id="Query"></textarea>*@
+                }
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <input class="center-block" type="submit" value="Submit Query" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table cellpadding="0" cellspacing="0" border="0" class="display" id="results"></table>
+            </div>
+        </div>        
+        <script type="text/javascript">
+            $(document).ready(function () {
+
+                var string1 = '[{"COLUMNS":[{ "title": "NAME", "visible": true}, { "Title": "COUNTY", "visible": false}],"DATA":[["John Doe","Fresno"],["Billy","Fresno"],["Tom","Kern"],["King Smith","Kings"]]}]';
+                var testObject = eval();
+                var useIt = @useGrid;
+                if( useIt ){
+                    
+                    var d = $('<div>')
+
+                    d.html('@queryResult');
+                    var string2 = "[" + d.text() + "]";
+                    var dataObject = eval(string2);
+
+                    var columns = [];
+                    $('#results').DataTable({
+                        "data": dataObject[0].DATA,
+                        "columns": dataObject[0].COLUMNS
+                    });
+                }
+                });
+        </script>
+    }
+}

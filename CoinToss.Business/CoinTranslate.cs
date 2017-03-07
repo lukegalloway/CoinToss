@@ -13,11 +13,13 @@ namespace CoinToss.Business
         private string FIRST_SELECT { get; set; }
         private bool SQL_IS_GENERATED { get; set; }
         private bool HAS_COIN_KEYWORD_USING { get; set; }
+        private bool IS_EXTRACT { get; set; }
         public CoinTranslate() { }
         public CoinTranslate(string coin)
         {
             COIN_QUERY = coin;
             SQL_IS_GENERATED = false;
+            IS_EXTRACT = false;
         }
         public bool IsCoinTranslateDone()
         {
@@ -36,7 +38,7 @@ namespace CoinToss.Business
             List<string> newPhrase = new List<string>();
             foreach(string word in phrase)
             {
-                string x = TranslateCoinKeyword(word).Coalesce() ?? GetSqlKeyword(word).ToUpper().Coalesce() ?? word;
+                string x = TranslateCoinKeyword(word).Coalesce() ?? GetSqlKeyword(word).ToUpper().Coalesce() ?? TranslateSchemaKeyword(word).Coalesce() ?? word;
                 newPhrase.Add(x.Replace("”)", "%'").Replace("” )", "%'").Replace("\")", "%'"));
             }
 
@@ -57,18 +59,47 @@ namespace CoinToss.Business
             return string.Empty;
         }
 
+        private string TranslateSchemaKeyword(string word)
+        {
+            if (!IS_EXTRACT)
+                return word;
+            string schemaWord = string.Empty;
+            string w = word.ToLower();//use for comparisons only.
+            switch (w)
+            {
+                case "singer": schemaWord = "S.Singer";
+                    break;
+                case "title": schemaWord = "C.Title";
+                    break;
+                case "singer,":
+                    schemaWord = "S.Singer,";
+                    break;
+                case "title,":
+                    schemaWord = "C.Title,";
+                    break;
+                case "singers": schemaWord = "testdb.singers s left outer join testdb.concerts c on s.Singer = c.Singer";
+                    break;
+                default:
+                    break;
+            }
+            return schemaWord;
+        }
+
         private string TranslateCoinKeyword(string word)
         {
             string w = word.ToLower();
             string end = string.Empty;
             if (w.Contains("s/"))
             {
-                word = w.Replace("(s/", "").Replace("( s/", "").Replace("”", "").Replace("\"", "");
-                return string.Format("{0} LIKE '%{1}", this.FIRST_SELECT, word);
+                word = word.Replace("(s/", "").Replace("( s/", "").Replace("( S/", "").Replace("(S/", "").Replace("”", "").Replace("\"", "");
+                //SCHEMA SPECIFIC HERE
+                string s = string.Format("{0} LIKE '%{1}", this.FIRST_SELECT, word);
+                s = s.Replace("Singer","S.Singer").Replace("Title", "C.Title");
+                return s;
             }
             switch (w)
             {
-                case "extract": end = "select";
+                case "extract": end = "select"; IS_EXTRACT = true;
                     break;
                 case "using":
                     this.HAS_COIN_KEYWORD_USING = true;

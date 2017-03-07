@@ -81,7 +81,7 @@
                 $('#CoinQuery').val(this.value);
             });
             $('#SqlSelection').click(function(){//change
-                $('#Query').val(this.value);  
+                $('#Query').val(this.value.substr(4));  
                 $('#SqlQuery').val(this.value);
             });
             $(document).ready(function () {

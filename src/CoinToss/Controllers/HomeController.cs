@@ -33,6 +33,23 @@ namespace CoinToss.Controllers
             var singers = await GetListFromSqlQuery("select singer from testdb.singers");
             return View(singers);
         }
+        public async Task<IActionResult> SqlSelect()
+        {
+            var singers = await GetListFromSqlQuery("select singer from testdb.singers");
+            return View(singers);
+        }
+        [ValidateAntiForgeryToken]
+        [HttpPost]
+        public async Task<IActionResult> SqlSelect(string SingerSelection)
+        {
+            if (string.IsNullOrEmpty(SingerSelection))
+                return View(null);
+            var json = await GetAnyGridFromSqlQuery(string.Format("select * from testdb.singers where singer LIKE '%{0}%'", SingerSelection));
+            ViewData["json"] = json;
+
+            var singers = await GetListFromSqlQuery("select singer from testdb.singers");
+            return View(singers);
+        }
         public async Task<IActionResult> CoinToss()
         {
             ViewData["json"] = string.Empty;
@@ -47,7 +64,10 @@ namespace CoinToss.Controllers
         {
             if (string.IsNullOrEmpty(query))
                 return View(null);
-            string json = await GetAnyGridFromSqlQuery(query);
+            var coin = new CoinTranslate(query);
+            //string json = await GetAnyGridFromSqlQuery(query);
+            string json = await GetAnyGridFromSqlQuery(coin.Translate());
+
             ViewData["json"] = json;
             ViewData["SqlExamples"] = ex.Sql;
             ViewData["CoinExamples"] = ex.Coin;
@@ -65,6 +85,40 @@ namespace CoinToss.Controllers
                 dropDownList = (await conn.QueryAsync<string>(query)).ToList();
             }
             return dropDownList;
+        }
+        private static string ConvertAnyModelToJson(List<AnyModel> coinInterfaceView)
+        {
+            string json = string.Empty;
+            var dd = new DynamicData();
+            dd.COLUMNS.Add(new Column("Id"));
+            dd.COLUMNS.Add(new Column("Title"));
+            dd.COLUMNS.Add(new Column("City"));
+            dd.COLUMNS.Add(new Column("Singer"));
+            dd.COLUMNS.Add(new Column("Nationality"));
+            dd.COLUMNS.Add(new Column("Year"));
+            foreach (var v in coinInterfaceView)
+            {
+                var d = new List<string>();
+                d.Add(v.Id.ToString());
+                d.Add(v.Title);
+                d.Add(v.City);
+                d.Add(v.Singer);
+                d.Add(v.Nationality);
+                d.Add(v.Year.ToString());
+                dd.DATA.Add(d);
+            }
+            return JsonConvert.SerializeObject(dd);
+        }
+        private static async Task<List<AnyModel>> Create_CoinInterfaceView(string query)
+        {
+            var rows = new List<AnyModel>();
+            //Send Query To Database
+            using (var conn = new MySql.Data.MySqlClient.MySqlConnection("Server=localhost;Port=3306;Database=TestDb;Uid=luke;Pwd=salasana;"))
+            {
+                await conn.OpenAsync();
+                rows = (await conn.QueryAsync<AnyModel>(query)).ToList();
+            }
+            return rows;
         }
 
         private static async Task<string> GetAnyGridFromSqlQuery(string query)
@@ -98,7 +152,6 @@ namespace CoinToss.Controllers
                 }
                 json = JsonConvert.SerializeObject(dd);
             }
-
             return json;
         }
 
