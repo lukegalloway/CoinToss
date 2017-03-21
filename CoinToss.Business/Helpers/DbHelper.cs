@@ -23,8 +23,8 @@ namespace CoinToss.Business.Helpers
         }
         private static string GetDbConn()
         {
-            //return "testdb";
-            return "Server=localhost;Port=3306;Database=TestDb;Uid=luke;Pwd=salasana;";
+            //return "Server=localhost;Port=3306;Database=TestDb;Uid=luke;Pwd=salasana;";
+            return "Server=my02.winhost.com;Port=3306;Database=mysql_111979_turtle;Uid=turtleuser;Pwd=TyhmaTurtle1@3;";
         }
     }
 }
