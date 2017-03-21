@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="CoinTranslate.cs" />
     <Compile Include="Examples.cs" />
+    <Compile Include="Helpers\DbHelper.cs" />
     <Compile Include="ViewModels\ConcertsViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringExtension.cs" />

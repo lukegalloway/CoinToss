@@ -10,6 +10,7 @@ using CoinToss.Models;
 using Newtonsoft.Json;
 using static CoinToss.Models.DynamicData;
 using CoinToss.Business;
+using CoinToss.Business.Helpers;
 
 namespace CoinToss.Controllers
 {
@@ -18,7 +19,7 @@ namespace CoinToss.Controllers
         Examples ex = new Examples();
         public async Task<IActionResult> CoinSelect()
         {
-            var singers = await GetListFromSqlQuery("select singer from testdb.singers");
+            var singers = await GetListFromSqlQuery("select singer from " + DbHelper.Name() + ".singers");
             return View(singers);
         }
         [ValidateAntiForgeryToken]
@@ -27,15 +28,20 @@ namespace CoinToss.Controllers
         {
             if (string.IsNullOrEmpty(SingerSelection))
                 return View(null);
-            var json = await GetAnyGridFromSqlQuery(string.Format("select * from testdb.singers where singer LIKE '%{0}%'", SingerSelection));
-            ViewData["json"] = json;
+            var coinQuery = string.Format("extract Singer, Title from singers using (S/\"{0}\")", SingerSelection);
+            //string InjectionAttack = "extract UserName, PasswordHash from users using (S/\"admin\") and (S/\"pass\") where ";
+            //string sqlAttack = "select username, passwordHash, from users where username = 'admin' and (pass = 0) = 0";
+            var coin = new CoinTranslate(coinQuery);
+            var sqlQuery = coin.Translate();
+            var CoIn_Interface_View = await Create_CoinInterfaceView(sqlQuery);
+            ViewData["json"] = ConvertAnyModelToJson(CoIn_Interface_View);
 
-            var singers = await GetListFromSqlQuery("select singer from testdb.singers");
+            var singers = await GetListFromSqlQuery("select singer from " + DbHelper.Name() + ".singers");
             return View(singers);
         }
         public async Task<IActionResult> SqlSelect()
         {
-            var singers = await GetListFromSqlQuery("select singer from testdb.singers");
+            var singers = await GetListFromSqlQuery("select singer from " + DbHelper.Name() + ".singers");
             return View(singers);
         }
         [ValidateAntiForgeryToken]
@@ -44,10 +50,10 @@ namespace CoinToss.Controllers
         {
             if (string.IsNullOrEmpty(SingerSelection))
                 return View(null);
-            var json = await GetAnyGridFromSqlQuery(string.Format("select * from testdb.singers where singer LIKE '%{0}%'", SingerSelection));
+            var json = await GetAnyGridFromSqlQuery(string.Format("select * from " + DbHelper.Name() + ".singers where singer LIKE '%{0}%'", SingerSelection));
             ViewData["json"] = json;
 
-            var singers = await GetListFromSqlQuery("select singer from testdb.singers");
+            var singers = await GetListFromSqlQuery("select singer from " + DbHelper.Name() + ".singers");
             return View(singers);
         }
         public async Task<IActionResult> CoinToss()
@@ -79,7 +85,7 @@ namespace CoinToss.Controllers
         {
             var dropDownList = new List<string>();
             //Send Query To Database
-            using (var conn = new MySql.Data.MySqlClient.MySqlConnection("Server=localhost;Port=3306;Database=TestDb;Uid=luke;Pwd=salasana;"))
+            using (var conn = new MySql.Data.MySqlClient.MySqlConnection(DbHelper.Conn()))
             {
                 await conn.OpenAsync();
                 dropDownList = (await conn.QueryAsync<string>(query)).ToList();
@@ -113,7 +119,7 @@ namespace CoinToss.Controllers
         {
             var rows = new List<AnyModel>();
             //Send Query To Database
-            using (var conn = new MySql.Data.MySqlClient.MySqlConnection("Server=localhost;Port=3306;Database=TestDb;Uid=luke;Pwd=salasana;"))
+            using (var conn = new MySql.Data.MySqlClient.MySqlConnection(DbHelper.Conn()))
             {
                 await conn.OpenAsync();
                 rows = (await conn.QueryAsync<AnyModel>(query)).ToList();
@@ -127,7 +133,7 @@ namespace CoinToss.Controllers
             var dd = new DynamicData();
             var rows = new List<AnyModel>();
             //Send Query To Database
-            using (var conn = new MySql.Data.MySqlClient.MySqlConnection("Server=localhost;Port=3306;Database=TestDb;Uid=luke;Pwd=salasana;"))
+            using (var conn = new MySql.Data.MySqlClient.MySqlConnection(DbHelper.Conn()))
             {
                 await conn.OpenAsync();
                 rows = (await conn.QueryAsync<AnyModel>(query)).ToList();

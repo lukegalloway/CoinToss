@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoinToss.Business.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -77,7 +78,7 @@ namespace CoinToss.Business
                 case "title,":
                     schemaWord = "C.Title,";
                     break;
-                case "singers": schemaWord = "testdb.singers s left outer join testdb.concerts c on s.Singer = c.Singer";
+                case "singers": schemaWord = DbHelper.Name() + ".singers s left outer join " + DbHelper.Name() + ".concerts c on s.Singer = c.Singer";
                     break;
                 default:
                     break;
