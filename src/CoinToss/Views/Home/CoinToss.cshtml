@@ -41,6 +41,8 @@
             Value = s.Value
         });
     }
+    listItems[0].Selected = true;
+    listItems2[0].Selected = true;
 }
 @{
     using (Html.BeginForm("CoinToss", "Home"))
@@ -57,6 +59,12 @@
             <div class="col-md-6">
                 @Html.DropDownList("SqlSelection", listItems)
             </div>
+        </div>
+        <div class="row" style="padding-top: 15px;">
+            <span class="col-md-12" id="COIN_SELECTION"></span>
+        </div>
+        <div class="row" style="padding-top: 15px;">
+            <span class="col-md-12" id="SQL_SELECTION"></span>
         </div>
         <div class="row" style="padding-top:15px;">
             <div class="col-md-12">
@@ -76,14 +84,36 @@
             </div>
         </div>        
         <script type="text/javascript">
-            $('#CoinSelection').click(function(){//change
+            $('#CoinSelection').click(function(e){//change
+                var i = $(this).find('option:selected').index() + 1;
+                $(this).find('option:selected').removeAttr('selected');
                 $('#Query').val(this.value);   
                 $('#CoinQuery').val(this.value);
+                $('#COIN_SELECTION').text("COIN: " + this.value);
+                var pc = $('#SqlSelection option:nth-child(' + i + ')').val();
+                $('#SQL_SELECTION').text("SQL:  " + pc);
+                $('#SqlSelection option:nth-child(' + i + ')').attr('selected','selected');
+                $('#CoinSelection option:nth-child(' + i + ')').attr('selected','selected');
             });
-            $('#SqlSelection').click(function(){//change
+            $('#SqlSelection').click(function(e){//change
+                var i = $(this).find('option:selected').index() + 1;
+                $(this).find('option:selected').removeAttr('selected');
                 $('#Query').val(this.value.substr(4));  
                 $('#SqlQuery').val(this.value);
+                $('#SQL_SELECTION').text("SQL:  " + this.value);
+                var pc = $('#CoinSelection option:nth-child(' + i + ')').val();
+                $('#COIN_SELECTION').text("COIN: " +pc);
+                $('#SqlSelection option:nth-child(' + i + ')').attr('selected','selected');
+                $('#CoinSelection option:nth-child(' + i + ')').attr('selected','selected');
             });
+            //$('#CoinSelection').touchstart(function(){//change
+            //    $('#Query').val(this.value);   
+            //    $('#CoinQuery').val(this.value);
+            //});
+            //$('#SqlSelection').touchstart(function(){//change
+            //    $('#Query').val(this.value.substr(4));  
+            //    $('#SqlQuery').val(this.value);
+            //});
             $(document).ready(function () {
                 @Html.Raw(selectedSql)
                 @Html.Raw(selectedCoin)
